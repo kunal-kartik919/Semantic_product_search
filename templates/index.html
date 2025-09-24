@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Recommendation System | Kartikey</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #0b1220;
+            --bg-tertiary: #111827;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #182235;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+            --shadow-md: 0 6px 12px -1px rgb(0 0 0 / 0.35), 0 3px 6px -2px rgb(0 0 0 / 0.35);
+            --shadow-lg: 0 16px 30px -8px rgb(0 0 0 / 0.45), 0 6px 12px -6px rgb(0 0 0 / 0.35);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: var(--transition);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .header {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+        }
+
+        .logo {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.45rem 0.6rem;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            display: inline-flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 4rem);
+        }
+
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 1rem;
+            font-size: 1rem;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.07);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Sample Users */
+        .sample-users {
+            margin-top: 1rem;
+        }
+
+        .sample-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .user-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .user-chip {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 0.35rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .user-chip:hover, .user-chip:focus {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            outline: none;
+        }
+
+        /* Controls Section */
+        .controls-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            padding-left: 2.6rem;
+        }
+
+        .filter-select {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 1rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .view-btn {
+            background: transparent;
+            border: none;
+            padding: 0.45rem 0.6rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            min-height: 200px;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .results-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .results-count {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Alert */
+        .alert {
+            color: white;
+            padding: 0.9rem 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .alert.hidden { display: none; }
+        .alert.success { background: linear-gradient(90deg, rgba(16,185,129,1) 0%, rgba(5,150,105,1) 100%); }
+        .alert.error { background: linear-gradient(90deg, rgba(239,68,68,1) 0%, rgba(185,28,28,1) 100%); }
+        .alert.info  { background: linear-gradient(90deg, rgba(59,130,246,1) 0%, rgba(139,92,246,1) 100%); }
+
+        /* Cards View */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .result-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            min-height: 160px;
+        }
+
+        .result-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .card-content {
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-top: auto;
+        }
+
+        /* Table View */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 0.9rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .results-table th {
+            background: var(--bg-tertiary);
+            font-weight: 700;
+            color: var(--text-primary);
+            position: sticky;
+            top: 0;
+        }
+
+        .results-table tbody tr { transition: var(--transition); }
+        .results-table tbody tr:hover { background: var(--bg-secondary); }
+
+        /* Pagination */
+        .pagination {
+            display: inline-flex;
+            gap: 0.4rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .page-btn {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            padding: 0.45rem 0.7rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-btn.active { background: var(--primary); color: white; }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2,6,23,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            max-width: 760px;
+            width: 100%;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-lg);
+            color: var(--text-primary);
+        }
+
+        .modal-header { display:flex; justify-content:space-between; align-items:center; gap: 1rem; }
+        .modal-body { margin-top: 0.75rem; display:grid; grid-template-columns: 1fr 2fr; gap: 1rem; }
+        .modal-image { background: linear-gradient(135deg,var(--primary),#8b5cf6); height:140px; border-radius: 8px; display:flex; align-items:center; justify-content:center; color: white; font-weight:700; }
+
+        /* Loading States */
+        .loading { display: flex; align-items: center; justify-content: center; padding: 2rem; color: var(--text-muted); }
+        .spinner { width: 2rem; height: 2rem; border: 2px solid var(--border); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 1rem; }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container { padding: 0 0.75rem; }
+            .header-content { height: 3.5rem; }
+            .section-title { font-size: 1.75rem; }
+            .search-form { grid-template-columns: 1fr; }
+            .controls-grid { grid-template-columns: 1fr; }
+            .results-grid { grid-template-columns: 1fr; }
+            .search-section, .controls-section, .results-section { padding: 1rem; }
+            .modal-body { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .main { padding: 1rem 0; }
+            .section-title { font-size: 1.5rem; }
+            .search-section, .controls-section, .results-section { padding: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo" aria-label="SmartRecommend home">
+                    <i class="fas fa-brain" aria-hidden="true"></i>
+                    <span>SmartRecommend</span>
+                </a>
+                <div class="header-controls">
+                    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                        <i class="fas fa-moon" id="theme-icon" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="hero">
+                <h1 class="section-title">Product Recommendation System</h1>
+                <p class="section-subtitle">Discover personalized product recommendations powered by advanced machine learning algorithms</p>
+            </div>
+
+            <!-- Search Section -->
+            <section class="search-section" aria-labelledby="search-heading">
+    <form class="search-form" id="recommendForm" onsubmit="handleSubmit(event)">
+        <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <input
+                type="text"
+                class="form-input"
+                id="username"
+                name="username"
+                placeholder="Enter username to get recommendations"
+                autocomplete="off"
+                aria-label="Username"
+            >
+        </div>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+            <!-- Submit button -->
+            <button type="submit" class="btn" aria-label="Get recommendations">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <span>Get</span>
+            </button>
+        </div>
+    </form>
+
+    <div class="sample-users" aria-hidden="false">
+        <span class="sample-label">Sample usernames (click to try):</span>
+        <div class="user-chips">
+            <button class="user-chip" onclick="selectUser('rebecca')">rebecca</button>
+            <button class="user-chip" onclick="selectUser('joshua')">joshua</button>
+            <button class="user-chip" onclick="selectUser('samantha')">samantha</button>
+            <button class="user-chip" onclick="selectUser('dorothy w')">dorothy w</button>
+        </div>
+    </div>
+</section>
+
+
+            <!-- Controls Section -->
+            <section class="controls-section">
+                <div class="controls-grid">
+                    <div class="search-box">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input
+                            type="text"
+                            class="form-input"
+                            id="globalSearch"
+                            placeholder="Search recommendations..."
+                            oninput="filterResults()"
+                            aria-label="Search recommendations"
+                        >
+                    </div>
+                    <select class="filter-select" id="sortSelect" onchange="sortResults()" aria-label="Sort recommendations">
+                        <option value="">Sort by...</option>
+                        <option value="name">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="relevance">Relevance</option>
+                    </select>
+                    <div class="view-toggle" role="tablist" aria-label="Toggle view">
+                        <button class="view-btn active" id="tableViewBtn" onclick="setView('table')" aria-pressed="true" aria-label="Table view">
+                            <i class="fas fa-list" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" aria-live="polite">
+                <div class="alert hidden" id="alert" role="status">
+                    <i class="fas fa-check-circle" id="alertIcon" aria-hidden="true"></i>
+                    <span id="alertText">Placeholder</span>
+                </div>
+
+                <div class="results-header">
+                    <h2 class="results-title">Recommendations</h2>
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        <span class="results-count" id="resultsCount">0 results found</span>
+                        <div id="paginationContainer"></div>
+                    </div>
+                </div>
+
+                <div class="loading hidden" style="display:none;" id="loading">
+                    <div class="spinner" aria-hidden="true"></div>
+                    Generating recommendations...
+                </div>
+
+                <!-- Grid View -->
+                <div class="results-grid" id="gridView" role="list">
+                </div>
+
+                <!-- Table View -->
+                <table class="results-table hidden" id="tableView" role="table" aria-label="Recommendations table">
+                    <thead>
+                        <tr id="tableHeader">
+                            <!-- Headers will be populated here -->
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Table rows will be populated here -->
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Theme Management (persisted to localStorage)
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+
+            if (currentTheme === 'dark') {
+                html.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+                currentTheme = 'light';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+                currentTheme = 'dark';
+            }
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        // Initialize theme on page load
+        let currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+
+            if (currentTheme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+            } else {
+                html.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+            }
+
+            // Initialize with sample data for demo
+            initializeSampleData();
+            setView(currentView);
+        });
+
+        // Sample user selection
+        function selectUser(username) {
+            const input = document.getElementById('username');
+            input.value = username;
+            input.focus();
+            // Immediately fetch simulated recommendations for this demo
+            fetchRecommendations(username);
+        }
+
+        // View management
+        let currentView = 'grid';
+        function setView(view) {
+            currentView = view;
+            const gridView = document.getElementById('gridView');
+            const tableView = document.getElementById('tableView');
+            const gridBtn = document.getElementById('gridViewBtn');
+            const tableBtn = document.getElementById('tableViewBtn');
+
+            if (view === 'grid') {
+                tableView.classList.add('hidden');
+                tableBtn.classList.remove('active');
+                tableBtn.setAttribute('aria-pressed', 'false');
+            } else {
+                tableView.classList.remove('hidden');
+                tableBtn.classList.add('active');
+                tableBtn.setAttribute('aria-pressed', 'true');
+            }
+
+            renderResults(lastRenderData);
+        }
+
+        // Data management
+        let currentData = [];
+        let filteredData = [];
+        let lastRenderData = [];
+
+        // Pagination
+        const ITEMS_PER_PAGE = 6;
+        let currentPage = 1;
+
+        // Initialize with sample data for demonstration
+        function initializeSampleData() {
+
+            filteredData = [...currentData];
+            lastRenderData = [...filteredData];
+            updateResultsCount();
+            renderResults(lastRenderData);
+        }
+
+        // Form submission handler (prevents default form submission; uses fetchRecommendations)
+        function handleSubmit(e) {
+            e && e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            if (!username) {
+                showAlert('Please enter a username', 'error');
+                return;
+            }
+            fetchRecommendations(username);
+        }
+
+        // Simulated API call for recommendations (replace with real fetch to backend)
+        function fetchRecommendations(username) {
+            showLoading(true);
+            const submitBtn = document.querySelector('#recommendForm button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            fetch("/recommend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Network error");
+                return response.json();
+            })
+            .then(data => {
+                showLoading(false); // Always hide loader after response
+                if (submitBtn) submitBtn.disabled = false;
+                if (!Array.isArray(data) || !data.length) {
+                    filteredData = [];
+                    lastRenderData = [];
+                    showAlert(`No recommendations found for user: ${username}`, "error");
+                } else {
+                    filteredData = data;
+                    lastRenderData = [...filteredData];
+                    showAlert(`Recommendations generated for user: ${username}`, "success");
+                }
+                currentPage = 1;
+                updateResultsCount();
+                renderResults(lastRenderData);
+            })
+            .catch(err => {
+                showLoading(false); // Always hide loader on error
+                if (submitBtn) submitBtn.disabled = false;
+                console.error(err);
+                showAlert("Failed to fetch recommendations", "error");
+            });
+        }
+
+        // Loading state management
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            console.log(loading);
+            if (show) {
+                loading.classList.remove('hidden');
+            } else {
+                loading.classList.add('hidden');
+            }
+        }
+
+        // Alert management
+        let alertTimer = null;
+        function showAlert(message, type = 'info') {
+            const alert = document.getElementById('alert');
+            const alertText = document.getElementById('alertText');
+            const alertIcon = document.getElementById('alertIcon');
+
+            alertText.textContent = message;
+            alert.className = `alert ${type}`;
+
+            // set icon
+            const icons = { success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle', info: 'fas fa-info-circle' };
+            alertIcon.className = icons[type] || 'fas fa-info-circle';
+
+            // Auto-hide after 4 seconds
+            if (alertTimer) clearTimeout(alertTimer);
+            alertTimer = setTimeout(() => { alert.classList.add('hidden'); }, 4000);
+        }
+
+        // Search and filter functionality
+        function filterResults() {
+            const searchTerm = document.getElementById('globalSearch').value.toLowerCase();
+            filteredData = currentData.filter(item =>
+                Object.values(item).some(value =>
+                    String(value).toLowerCase().includes(searchTerm)
+                )
+            );
+            lastRenderData = [...filteredData];
+            currentPage = 1;
+            updateResultsCount();
+            renderResults(lastRenderData);
+        }
+
+        // Sort functionality
+        function sortResults() {
+            const sortValue = document.getElementById('sortSelect').value;
+
+            if (!sortValue) {
+                filteredData = [...currentData];
+            } else {
+                filteredData.sort((a, b) => {
+                    switch (sortValue) {
+                        case 'name':
+                            return a.product_name.localeCompare(b.product_name);
+                        case 'name-desc':
+                            return b.product_name.localeCompare(a.product_name);
+                        case 'relevance':
+                            return (b.rating || 0) - (a.rating || 0);
+                        default:
+                            return 0;
+                    }
+                });
+            }
+
+            lastRenderData = [...filteredData];
+            currentPage = 1;
+            renderResults(lastRenderData);
+        }
+
+
+        // Update results count
+        function updateResultsCount() {
+            const count = (lastRenderData && lastRenderData.length) || 0;
+            document.getElementById('resultsCount').textContent = `${count} result${count !== 1 ? 's' : ''} found`;
+        }
+
+        // Render results based on current view and pagination
+        function renderResults(data) {
+            lastRenderData = Array.isArray(data) ? data : [];
+            currentPage = Math.min(currentPage, Math.max(1, Math.ceil(lastRenderData.length / ITEMS_PER_PAGE)));
+            renderPage();
+        }
+
+        function renderPage() {
+            const totalItems = lastRenderData.length;
+            const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const pageItems = lastRenderData.slice(start, start + ITEMS_PER_PAGE);
+
+           renderTableView(pageItems);
+
+            renderPagination(totalPages);
+            updateResultsCount();
+        }
+
+        // Render grid view
+        function renderGridView(data) {
+            const container = document.getElementById('gridView');
+
+            if (!data || data.length === 0) {
+                return;
+            }
+
+            container.innerHTML = data.map(item => `
+                <div class="result-card" role="listitem" onclick="showItemDetails(${item.id})" tabindex="0" onkeydown="if(event.key==='Enter') showItemDetails(${item.id})">
+                    <div class="card-header">
+                        <div class="card-icon" aria-hidden="true">
+                            <i class="fas ${getCategoryIcon(item.category)}"></i>
+                        </div>
+                        <div style="flex:1; min-width:0;">
+                            <div class="card-title">${escapeHtml(item.product_name)}</div>
+                            <div class="card-subtitle">${escapeHtml(item.category)} • ${escapeHtml(item.price)}</div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p style="margin:0;">${escapeHtml(item.description)}</p>
+                        <div style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="color:var(--warning);">${generateStars(item.rating)}</div>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">${item.rating}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render table view
+        function renderTableView(data) {
+            const header = document.getElementById('tableHeader');
+            const body = document.getElementById('tableBody');
+
+            if (!data || data.length === 0) {
+                header.innerHTML = '';
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="100%" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <i class="fas fa-search" style="font-size: 1.6rem; margin-bottom: 0.5rem; opacity: 0.5; display:block;"></i>
+                            No recommendations found. Try adjusting your search criteria.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Generate headers from first item (excluding long description in table)
+            const keys = Object.keys(data[0]).filter(key => key !== 'description');
+            header.innerHTML = keys.map(key => `<th>${key.replace(/_/g, ' ').toUpperCase()}</th>`).join('');
+
+            body.innerHTML = data.map(item => `
+                <tr onclick="showItemDetails(${item.id})" style="cursor: pointer;" tabindex="0" onkeydown="if(event.key==='Enter') showItemDetails(${item.id})">
+                    ${keys.map(key => `<td>${escapeHtml(item[key])}</td>`).join('')}
+                </tr>
+            `).join('');
+        }
+
+        // Pagination UI
+        function renderPagination(totalPages) {
+            const container = document.getElementById('paginationContainer');
+            if (!container) return;
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `<div class="pagination">`;
+            html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})" aria-label="Previous page">Prev</button>`;
+
+            // show up to 5 page numbers
+            const start = Math.max(1, currentPage - 2);
+            const end = Math.min(totalPages, start + 4);
+            for (let p = start; p <= end; p++) {
+                html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})" aria-label="Page ${p}">${p}</button>`;
+            }
+
+            html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})" aria-label="Next page">Next</button>`;
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function goToPage(p) {
+            const totalPages = Math.max(1, Math.ceil(lastRenderData.length / ITEMS_PER_PAGE));
+            if (p < 1 || p > totalPages) return;
+            currentPage = p;
+            renderPage();
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        // Helper functions
+        function getCategoryIcon(category) {
+            const icons = {
+                'Electronics': 'fa-laptop',
+                'Clothing': 'fa-tshirt',
+                'Wearables': 'fa-watch',
+                'Books': 'fa-book',
+                'Home': 'fa-home',
+                'Sports': 'fa-dumbbell'
+            };
+            return icons[category] || 'fa-cube';
+        }
+
+        function generateStars(rating) {
+            if (typeof rating !== 'number') return '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let stars = '';
+
+            for (let i = 0; i < fullStars; i++) stars += '<i class="fas fa-star" aria-hidden="true"></i>';
+            if (hasHalfStar) stars += '<i class="fas fa-star-half-alt" aria-hidden="true"></i>';
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) stars += '<i class="far fa-star" aria-hidden="true"></i>';
+            return stars;
+        }
+
+        function showItemDetails(id) {
+            const item = currentData.find(it => it.id === id) || lastRenderData.find(it => it.id === id);
+            if (!item) return showAlert('Item not found', 'error');
+
+            // build modal
+            const modal = document.createElement('div');
+            modal.className = 'modal-backdrop';
+            modal.innerHTML = `
+                <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title-${item.id}">
+                    <div class="modal-header">
+                        <h3 id="modal-title-${item.id}" style="margin:0; font-size:1.1rem;">${escapeHtml(item.product_name)}</h3>
+                        <button class="page-btn" onclick="closeModal(this.parentElement.parentElement.parentElement)">Close</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-image">${escapeHtml(item.category || '')}</div>
+                        <div>
+                            <p style="margin:0 0 0.5rem 0; color:var(--text-secondary);">${escapeHtml(item.description || '')}</p>
+                            <p style="margin:0.25rem 0; font-weight:700;">${escapeHtml(item.price || '')} <span style="font-weight:600; color:var(--text-muted); font-size:0.9rem;">• ${item.rating || '—'}</span></p>
+
+                            <div style="margin-top:0.75rem; display:flex; gap:0.5rem;">
+                                <button class="btn" onclick="addToCart(${item.id})">Add to cart</button>
+                                <button class="btn" style="background:var(--secondary);" onclick="copyItem(${item.id})">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // close on backdrop click
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+            document.body.appendChild(modal);
+            // focus for accessibility
+            const firstBtn = modal.querySelector('button');
+            firstBtn && firstBtn.focus();
+        }
+
+        function closeModal(el) { if (el && el.remove) el.remove(); }
+
+        function addToCart(id) { showAlert('Added to cart (demo)', 'info'); }
+
+        function copyItem(id) {
+            const item = currentData.find(it => it.id === id) || lastRenderData.find(it => it.id === id);
+            if (!item) return showAlert('Item not found', 'error');
+            const text = `${item.product_name} - ${item.price} - ${item.description}`;
+            copyToClipboard(text);
+            showAlert('Copied item details to clipboard', 'success');
+        }
+
+        function copyToClipboard(text) {
+            if (!navigator.clipboard) {
+                const ta = document.createElement('textarea');
+                ta.value = text; document.body.appendChild(ta);
+                ta.select(); document.execCommand('copy'); ta.remove();
+                return;
+            }
+            navigator.clipboard.writeText(text).catch(() => {});
+        }
+
+        // CSV download
+        function downloadCSV() {
+            const data = lastRenderData.length ? lastRenderData : filteredData.length ? filteredData : currentData;
+            if (!data || data.length === 0) return showAlert('No data to download', 'error');
+
+            const keys = Object.keys(data[0]);
+            const csvRows = [keys.join(',')];
+            for (const row of data) {
+                const vals = keys.map(k => `"${String(row[k] ?? '').replace(/"/g, '""')}"`);
+                csvRows.push(vals.join(','));
+            }
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'recommendations.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        // Utility: escape HTML to avoid XSS in demo
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+    </script>
+</body>
+</html>
