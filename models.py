@@ -25,9 +25,9 @@ MODEL_ID_RF = "1ycoXABkHx8d2h-cIPRgsynzSiMHkivdO"
 MODEL_ID_UU = "1wNxRT-O1JIVdKDwiOqQq3d6uADALp6RQ"
 MODEL_ID_W2V = "1rTue19ch4iu0HyVSP2KFv8jCt52m2o1n"
 
-MODEL_PATH_RF = "Models/RandomForest_Word2Vec"
-MODEL_PATH_UU = "Models/user_user"
-MODEL_PATH_W2V = "Models/word2vec_model"
+MODEL_PATH_RF = "Models/RandomForest_Word2Vec.pkl"
+MODEL_PATH_UU = "Models/user_user.pkl"
+MODEL_PATH_W2V = "Models/word2vec_model.pkl"
 
 def download_from_drive(file_id: str, dest_path: str):
     """
@@ -43,7 +43,7 @@ def download_from_drive(file_id: str, dest_path: str):
 
 def ensure_models():
     # Download each model if not present
-    download_from_drive(MODEL_ID_RF, MODEL_PATH_RF)
+    download_from_drive(MODEL_ID_RF, MODEL_PATH_RF, )
     download_from_drive(MODEL_ID_UU, MODEL_PATH_UU)
     download_from_drive(MODEL_ID_W2V, MODEL_PATH_W2V)
 
